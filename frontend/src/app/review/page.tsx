@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import MemoryMap from '@/components/MemoryMap'
 import ProgressBar from '@/components/ProgressBar'
@@ -17,6 +17,14 @@ interface MemoryItem {
 }
 
 export default function ReviewPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[60vh]"><div className="text-xl text-slate-400">جاري التحميل...</div></div>}>
+      <ReviewContent />
+    </Suspense>
+  )
+}
+
+function ReviewContent() {
   const searchParams = useSearchParams()
   const mode = searchParams.get('mode')
   const [memoryData, setMemoryData] = useState<MemoryItem[]>([])
