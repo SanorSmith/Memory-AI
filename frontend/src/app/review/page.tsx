@@ -49,7 +49,7 @@ export default function ReviewPage() {
     )
   }
 
-  const categories = [...new Set(memoryData.map(item => item.category))]
+  const categories = Array.from(new Set(memoryData.map(item => item.category)))
   const overallStrength = memoryData.length > 0
     ? Math.round(memoryData.reduce((acc, item) => acc + item.strength, 0) / memoryData.length)
     : 0

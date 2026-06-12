@@ -29,7 +29,7 @@ export default function StudyPage() {
     const startSession = async () => {
       setLoading(true)
       try {
-        const data = await sendMessage("ابدأ الجلسة التعليمية وسل الطالب عن مستواه")
+        const data = await sendMessage("ابدأ الجلسة التعليمية وسل الطالب عن مستواه", [])
         setMessages([{ role: 'assistant', content: data.response }])
         setShowQuickReplies(true)
       } catch {
@@ -52,7 +52,8 @@ export default function StudyPage() {
     setLoading(true)
 
     try {
-      const data = await sendMessage(userMessage)
+      const history = messages.map(m => ({ role: m.role, content: m.content }))
+      const data = await sendMessage(userMessage, history)
       setMessages(prev => [...prev, { role: 'assistant', content: data.response }])
     } catch {
       setMessages(prev => [...prev, {

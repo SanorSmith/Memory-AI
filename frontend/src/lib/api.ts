@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || ''
 
 async function apiFetch(path: string, options?: RequestInit) {
   const res = await fetch(`${API_URL}${path}`, {
@@ -54,10 +54,10 @@ export interface ExamResult {
   time_taken_formatted: string;
 }
 
-export async function sendMessage(message: string) {
-  return apiFetch('/chat', {
+export async function sendMessage(message: string, history?: { role: string; content: string }[]) {
+  return apiFetch('/api/chat', {
     method: 'POST',
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, history }),
   })
 }
 
@@ -89,7 +89,7 @@ export async function getTopics() {
 }
 
 export async function resetChat() {
-  return apiFetch('/chat/reset', { method: 'POST' })
+  return apiFetch('/api/chat/reset', { method: 'DELETE' })
 }
 
 export async function generateExam(

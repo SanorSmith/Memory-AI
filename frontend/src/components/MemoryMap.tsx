@@ -15,7 +15,7 @@ interface MemoryMapProps {
 }
 
 export default function MemoryMap({ data }: MemoryMapProps) {
-  const categories = [...new Set(data.map(item => item.category))]
+  const categories = Array.from(new Set(data.map(item => item.category)))
 
   const getStrengthColor = (strength: number) => {
     if (strength >= 80) return 'bg-green-500'
