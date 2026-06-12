@@ -26,14 +26,17 @@ export default function RootLayout({
                   Memory AI
                 </span>
               </div>
-              <div className="flex gap-6">
+              <div className="flex gap-3 sm:gap-6 text-sm sm:text-base">
                 <a href="/" className="text-slate-300 hover:text-white transition-colors">
                   الرئيسية
                 </a>
                 <a href="/study" className="text-slate-300 hover:text-white transition-colors">
                   الدراسة
                 </a>
-                <a href="/review" className="text-slate-300 hover:text-white transition-colors">
+                <a href="/exam" className="text-slate-300 hover:text-white transition-colors">
+                  الامتحان
+                </a>
+                <a href="/review" className="text-slate-300 hover:text-white transition-colors hidden sm:block">
                   المراجعة
                 </a>
               </div>

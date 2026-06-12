@@ -47,7 +47,7 @@ export default function ResultsPage() {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-[#111b2e] border border-slate-700 rounded-xl p-4 text-center">
           <p className="text-green-400 text-2xl font-bold">{result.correct_count}</p>
           <p className="text-slate-400 text-xs">صحيح</p>
@@ -67,7 +67,7 @@ export default function ResultsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-slate-700 pb-2">
+      <div className="flex gap-2 border-b border-slate-700 pb-2 overflow-x-auto">
         {([
           { key: 'overview', label: '📊 نظرة عامة' },
           { key: 'categories', label: '📂 التصنيفات' },
@@ -171,7 +171,7 @@ export default function ResultsPage() {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-3 justify-center">
+      <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <Link
           href="/exam"
           className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 text-[#05080f] font-bold rounded-xl"

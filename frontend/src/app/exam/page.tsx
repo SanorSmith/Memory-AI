@@ -213,9 +213,17 @@ export default function ExamPage() {
   const currentAnswer = answers[String(currentQ.id)] || []
 
   return (
-    <div className="flex gap-4 min-h-[80vh]" dir="rtl">
-      {/* Left Sidebar */}
-      <div className="w-[160px] flex-shrink-0 space-y-3">
+    <div className="flex flex-col lg:flex-row gap-4 min-h-[80vh]" dir="rtl">
+      {/* Mobile Stats Bar */}
+      <div className="lg:hidden flex items-center justify-between bg-[#111b2e] border border-slate-700 rounded-xl px-4 py-2">
+        <span className="text-green-400 text-xs">✓ {answeredCount}/{questions.length}</span>
+        <span className="text-slate-300 text-xs font-mono">{formatTime(timeLeft)}</span>
+        <span className="text-orange-400 text-xs">⚑ {flagged.size}</span>
+        <button onClick={handleSubmit} className="px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-lg">📤 تسليم</button>
+      </div>
+
+      {/* Left Sidebar - hidden on mobile */}
+      <div className="hidden lg:block w-[160px] flex-shrink-0 space-y-3">
         <div className="bg-[#111b2e] border border-slate-700 rounded-xl p-3">
           <div className="grid grid-cols-5 gap-1">
             {questions.map((_, idx) => {
@@ -252,9 +260,9 @@ export default function ExamPage() {
       </div>
 
       {/* Main Area */}
-      <div className="flex-1 space-y-4">
-        {/* Top bar */}
-        <div className="flex items-center justify-between bg-[#111b2e] border border-slate-700 rounded-xl px-4 py-3">
+      <div className="flex-1 min-w-0 space-y-4">
+        {/* Top bar - hidden on mobile */}
+        <div className="hidden lg:flex items-center justify-between bg-[#111b2e] border border-slate-700 rounded-xl px-4 py-3">
           <div className={`font-mono font-bold text-lg ${timeLeft < 300 ? 'text-red-400' : 'text-white'}`}>
             ⏱ {formatTime(timeLeft)}
           </div>
