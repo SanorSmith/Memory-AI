@@ -1,0 +1,33 @@
+'use client'
+
+interface ProgressBarProps {
+  label: string
+  value: number
+  max: number
+}
+
+export default function ProgressBar({ label, value, max }: ProgressBarProps) {
+  const percentage = Math.round((value / max) * 100)
+
+  const getBarColor = () => {
+    if (percentage >= 80) return 'bg-green-500'
+    if (percentage >= 60) return 'bg-blue-500'
+    if (percentage >= 40) return 'bg-yellow-500'
+    return 'bg-red-500'
+  }
+
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-slate-300 font-medium">{label}</span>
+        <span className="text-slate-400">{percentage}%</span>
+      </div>
+      <div className="w-full bg-dark-200 rounded-full h-2.5 overflow-hidden">
+        <div
+          className={`h-full rounded-full ${getBarColor()} transition-all duration-500`}
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </div>
+  )
+}
