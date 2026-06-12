@@ -1,55 +1,127 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
-export async function sendMessage(message: string) {
-  const res = await fetch(`${API_URL}/chat`, {
-    method: 'POST',
+async function apiFetch(path: string, options?: RequestInit) {
+  const res = await fetch(`${API_URL}${path}`, {
     headers: { 'Content-Type': 'application/json' },
+    ...options,
+  })
+  if (!res.ok) {
+    const error = await res.text()
+    throw new Error(error || `Request failed: ${res.status}`)
+  }
+  return res.json()
+}
+
+export interface ExamQuestion {
+  id: number;
+  type: 'multiple_choice' | 'multiple_select' | 'scenario' | 'true_false';
+  category: string;
+  difficulty: string;
+  scenario: string | null;
+  question: string;
+  options: string[];
+  correct: number[];
+  explanation: string;
+  time_limit: number;
+  points: number;
+}
+
+export interface ExamResult {
+  score_1000: number;
+  passed: boolean;
+  earned_points: number;
+  total_points: number;
+  percentage: number;
+  correct_count: number;
+  wrong_count: number;
+  total_questions: number;
+  category_stats: Record<string, {
+    percentage: number;
+    correct: number;
+    total: number;
+    color: string;
+    emoji: string;
+  }>;
+  wrong_questions: Array<{
+    id: number;
+    question: string;
+    category: string;
+    explanation: string;
+  }>;
+  weak_categories: string[];
+  tonight_activation: string[];
+  recommendation: string;
+  time_taken_formatted: string;
+}
+
+export async function sendMessage(message: string) {
+  return apiFetch('/chat', {
+    method: 'POST',
     body: JSON.stringify({ message }),
   })
-  if (!res.ok) throw new Error('Failed to send message')
-  return res.json()
 }
 
 export async function getMemoryMap() {
-  const res = await fetch(`${API_URL}/memory-map`)
-  if (!res.ok) throw new Error('Failed to fetch memory map')
-  return res.json()
+  return apiFetch('/memory-map')
 }
 
 export async function submitAnswer(topicId: string, answer: string, timeSeconds: number) {
-  const res = await fetch(`${API_URL}/answer`, {
+  return apiFetch('/answer', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       topic_id: parseInt(topicId),
       answer,
       time_seconds: timeSeconds,
     }),
   })
-  if (!res.ok) throw new Error('Failed to submit answer')
-  return res.json()
 }
 
 export async function getWeakTopics() {
-  const res = await fetch(`${API_URL}/weak-topics`)
-  if (!res.ok) throw new Error('Failed to fetch weak topics')
-  return res.json()
+  return apiFetch('/weak-topics')
 }
 
 export async function getTonightReview() {
-  const res = await fetch(`${API_URL}/tonight-review`)
-  if (!res.ok) throw new Error('Failed to fetch tonight review')
-  return res.json()
+  return apiFetch('/tonight-review')
 }
 
 export async function getTopics() {
-  const res = await fetch(`${API_URL}/topics`)
-  if (!res.ok) throw new Error('Failed to fetch topics')
-  return res.json()
+  return apiFetch('/topics')
 }
 
 export async function resetChat() {
-  const res = await fetch(`${API_URL}/chat/reset`, { method: 'POST' })
-  if (!res.ok) throw new Error('Failed to reset chat')
-  return res.json()
+  return apiFetch('/chat/reset', { method: 'POST' })
+}
+
+export async function generateExam(
+  numQuestions: number,
+  weakTopics?: string[],
+  difficulty?: string
+): Promise<{ questions: ExamQuestion[]; total_questions: number; time_limit_minutes: number; passing_score: number }> {
+  return apiFetch('/api/exam/generate', {
+    method: 'POST',
+    body: JSON.stringify({
+      num_questions: numQuestions,
+      weak_topics: weakTopics || [],
+      difficulty: difficulty || 'mixed'
+    }),
+  })
+}
+
+export async function submitExam(
+  questions: ExamQuestion[],
+  answers: Record<string, number[]>,
+  timeTakenSeconds: number
+): Promise<ExamResult> {
+  return apiFetch('/api/exam/submit', {
+    method: 'POST',
+    body: JSON.stringify({
+      questions,
+      answers,
+      time_taken_seconds: timeTakenSeconds
+    }),
+  })
+}
+
+export async function resetChatApi(): Promise<{ message: string }> {
+  return apiFetch('/api/chat/reset', { method: 'DELETE' })
 }

@@ -3,11 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session as DBSession
 from pydantic import BaseModel
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, List, Dict
 
 from database import get_db, engine, Base
 from models import Topic, Session, Response, MemoryStrength
-from chat import chat_with_claude, reset_conversation
+from chat import chat_with_claude, reset_conversation, generate_exam, analyze_exam_results
 from seed import seed_database
 
 Base.metadata.create_all(bind=engine)
@@ -68,11 +68,16 @@ def on_startup():
 
 
 # Routes
-@app.post("/chat", response_model=ChatResponse)
+@app.get("/")
+def root():
+    return {"status": "ok", "message": "Memory AI Backend is running"}
+
+
+@app.post("/chat")
 def chat_endpoint(request: ChatRequest):
     try:
-        response = chat_with_claude(request.message)
-        return ChatResponse(response=response)
+        result = chat_with_claude(request.message)
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -242,6 +247,64 @@ def get_tonight_review(db: DBSession = Depends(get_db)):
         ))
 
     return review_topics
+
+
+# Exam models
+class ExamRequest(BaseModel):
+    num_questions: int = 40
+    weak_topics: Optional[List[str]] = []
+    difficulty: str = "mixed"
+
+
+class ExamResultRequest(BaseModel):
+    questions: List[Dict]
+    answers: Dict[str, List[int]]
+    time_taken_seconds: int
+
+
+@app.post("/api/exam/generate")
+async def generate_exam_endpoint(request: ExamRequest):
+    try:
+        if request.num_questions < 5:
+            raise HTTPException(status_code=400, detail="Minimum 5 questions")
+        if request.num_questions > 60:
+            raise HTTPException(status_code=400, detail="Maximum 60 questions")
+        exam_data = generate_exam(
+            request.num_questions,
+            request.weak_topics or [],
+            request.difficulty
+        )
+        questions = exam_data.get("questions", [])
+        return {
+            "questions": questions,
+            "total_questions": len(questions),
+            "time_limit_minutes": request.num_questions,
+            "passing_score": 700,
+            "message": f"Generated {len(questions)} questions"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/exam/submit")
+async def submit_exam_endpoint(request: ExamResultRequest):
+    try:
+        result = analyze_exam_results(request.questions, request.answers)
+        result["time_taken_seconds"] = request.time_taken_seconds
+        mins = request.time_taken_seconds // 60
+        secs = request.time_taken_seconds % 60
+        result["time_taken_formatted"] = f"{mins} min {secs} sec"
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/api/chat/reset")
+async def reset_chat_api():
+    reset_conversation()
+    return {"message": "Conversation reset"}
 
 
 if __name__ == "__main__":
